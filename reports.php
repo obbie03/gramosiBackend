@@ -18,7 +18,7 @@ if(isset($_GET['gl'])){
 
 if(isset($_GET['state'])){
     $cid = $_GET['state'];
-    $bills = $f->selectJoins("SELECT b.*,i.*, c.*
+    $bills = $f->selectJoins("SELECT b.*,i.amount, i.coa_id, i.description, c.firstname, c.lastname
     FROM bills AS b
     LEFT JOIN (
         SELECT *
@@ -35,7 +35,8 @@ if(isset($_GET['cs'])){
     $bills = $f->selectJoins("SELECT
     b.*,
     i.total_amount,
-    c.*
+    c.*,
+    ab.amount as balance
 FROM
     bills AS b
 LEFT JOIN (
@@ -46,7 +47,7 @@ LEFT JOIN (
         billsitems
     GROUP BY
         b_id
-) AS i ON b.id = i.b_id
+) AS i ON b.id = i.b_id left join all_balances ab on b.customer = ab.u_id
 LEFT JOIN bio_data AS c ON b.customer = c.u_id")->fetchAll();
     $recs = $f->selectJoins("select * from receipts r left join bills b on r.b_id = b.id left join bio_data c on b.customer = c.u_id")->fetchAll();
     echo json_encode(array('bills'=>$bills, 'recs'=>$recs));

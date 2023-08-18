@@ -45,7 +45,7 @@ if(isset($_POST['uidsingle'])){
 if(isset($_GET['bills'])){
     $uid = $_GET['bills'];
     $cid = getcid($uid);
-    $f->load("SELECT b.*, COALESCE(i.total_amount - COALESCE(r.total_amount, 0), 0) AS amount
+    $f->load("SELECT b.*,c.firstname, c.lastname, COALESCE(i.total_amount - COALESCE(r.total_amount, 0), 0) AS amount
     FROM bills AS b
     LEFT JOIN (
         SELECT b_id, SUM(amount) AS total_amount
@@ -56,7 +56,7 @@ if(isset($_GET['bills'])){
         SELECT b_id, SUM(amount) AS total_amount
         FROM receipts
         GROUP BY b_id
-    ) AS r ON b.id = r.b_id
+    ) AS r ON b.id = r.b_id left join bio_data c on b.customer = c.u_id
     WHERE COALESCE(i.total_amount, 0) > COALESCE(r.total_amount, 0) and b.cid = '$cid'
     ");
 }

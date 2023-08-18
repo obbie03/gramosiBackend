@@ -38,12 +38,19 @@ if(isset($_POST['upType'])){
              $checking = $f->selectData('user_property', '', "where u_id = '$uid' and p_id = '$pid' limit 1");
              if($checking->rowCount() == 0){
                  $upid = $f->insertReturnId(array('u_id'=>$uid, 'p_id'=>$pid), 'user_property');
-                 $check = $f->insertData(array('up_id'=>$upid, 'amount'=>$data['balance'], 'year'=>date('Y')), 'all_balances');
+                 $check = $f->insertData(array('u_id'=>$uid, 'amount'=>$data['balance'], 'year'=>date('Y')), 'all_balances');
              }
             }
            }
         }
     }
+
+    if($_POST['upType'] == 'bank'){
+        foreach($_POST['upData'] as $data){
+           $check = addBank($data['name'], $data['code'], $data['account_no']);
+        }
+    }
+
     if($check){
         echo json_encode(array('status'=>200, 'msg'=>'Upload successful'));
     }else{

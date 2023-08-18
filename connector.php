@@ -42,12 +42,24 @@ function addCustomer($name, $account, $code){
 
 function addPropertyType($name){
     global $f;
+    $name = strtolower($name);
     $prop = $f->selectData('property_type', '', "where lower(name) = '$name' limit 1");
     if($prop->rowCount() > 0){
         return $prop->fetchObject()->id;
     }
     $id = $f->insertReturnId(array('name'=>$name), 'property_type');
     return $id;
+}
+
+function addBank($name, $code, $account){
+    global $f;
+    $name = strtolower($name);
+    $bank = $f->selectData('bank', '', "where lower(name) = '$name' limit 1");
+    if($bank->rowCount() > 0){
+        return $bank->fetchObject()->id;
+    }
+    $f->insertData(array('name'=>$name, 'code'=>$code, 'account_no'=>$account, 'c_id'=>1), 'bank');
+    return true;
 }
 
 function addProperty($name, $coa,$type, $street, $town,$location, $plot, $hectares, $value, $improvement, $rate_value, $rate, $payable){

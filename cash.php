@@ -2,8 +2,8 @@
 include('connector.php');
 
 if(isset($_POST['exType'])){
-   $check = $f->insertData(array_combine(array('chq', 'amount', 'description', 'paye', 'mode'), 
-   array($_POST['exType'], $_POST['Examount'], $_POST['Exdesc'], $_POST['Expaye'], $_POST['cashType'])), 'cashbook');
+   $check = $f->insertData(array_combine(array('coa_id', 'amount', 'description', 'paye', 'type', 'cid'), 
+   array($_POST['exType'], $_POST['Examount'], $_POST['Exdesc'], $_POST['Expaye'], $_POST['cashType'], 1)), 'cashbook');
    if($check){
     echo json_encode(array('status'=>200, 'msg'=>'Successfully added'));
    }else{

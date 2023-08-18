@@ -14,7 +14,7 @@ if(isset($_GET['getgen'])){
 
 if(isset($_GET['uniqueId'])){
     $code = $_GET['uniqueId'];
-    $data = $f->selectJoins("SELECT *, p.name as programme FROM chart_of_account c left join programmes p on c.id = p.c_id WHERE account = '$code' ")->fetchAll();
+    $data = $f->selectJoins("SELECT c.*, p.name as programme FROM chart_of_account c left join programmes p on c.programme = p.id WHERE account = '$code'")->fetchAll();
     echo json_encode($data);
 }
 
