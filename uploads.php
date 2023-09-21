@@ -19,16 +19,32 @@ if(isset($_POST['upType'])){
             }
         }
     }
-
     if($_POST['upType'] == 'Customers'){
         foreach($_POST['upData'] as $data){
-           $check = addCustomer($data['name'], $data['Account_number'], $data['code']);
+           $check = addCustomers($data['name'], $data['Account_number'], $data['code']);
         }
+    }
+    if($_POST['upType'] == 'budget'){
+        foreach($_POST['upData'] as $data){
+           $did = addDept($data['department']);
+           $pid = addProgram($data['programme']);
+           $coa = $f->selectData('chart_of_account', '', "where account = '".$data['COA']."' limit 1")->fetchObject()->id;
+           $data = [
+            'dept'=>$did,
+            'coa'=>$coa,
+            'amount'=>$data['amount'],
+            'program'=>$pid,
+            'subprogram'=>$data['subprogram'],
+            'toy'=>$data['TOI']
+           ];
+           $check = $f->insertData($data, 'budget');
+        }
+        
     }
     if($_POST['upType'] == 'valuation'){
         foreach($_POST['upData'] as $data){
            $type = addPropertyType($data['property_type']);
-           $pid = addProperty($data['property_name'], $data['coa_no'],$type, $data['street'], $data['Town'],$data['location'], 
+           $pid = addPropertys($data['property_name'], $data['coa_no'],$type, $data['street'], $data['Town'],$data['location'], 
            $data['stand_plot_no'], $data['area_hectares'], $data['value_of_land'], $data['value_of_improvement'], $data['total_rateable_value'], $data['rate'], $data['rates_payable']);
            $account = $data['account_no'];
            if($pid != 0){

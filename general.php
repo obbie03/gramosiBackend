@@ -9,7 +9,15 @@ if(isset($_GET['getgen'])){
     $banks = $f->selectData('bank', '', "where c_id = '$cid'")->fetchAll();
     $cc = $f->selectData('collection_center', '', "where c_id = '$cid'")->fetchAll();
     $coa = $f->selectData('chart_of_account', '', "where c_id = '$cid'")->fetchAll();
-    echo json_encode(array('sof'=>$sof, 'banks'=>$banks, 'cc'=>$cc, 'coa'=>$coa));
+    $budget = $f->selectData('budget', '', "order by subprogram asc")->fetchAll();
+    $dept = $f->selectData('department', '', "")->fetchAll();
+    $prog = $f->selectData('programmes', '', "where c_id = '$cid'")->fetchAll();
+    $head = $f->selectData('projhead', '', "order by name asc")->fetchAll();
+    $sub = $f->selectData('projsub', '', "order by name asc")->fetchAll();
+    $suppliers = $f->selectData('suppliers', '', "order by name asc")->fetchAll();
+    $cust = $f->selectJoins("select * from customers inner join bio_data on customers.u_id = bio_data.u_id where customers.type = 1 order by customers.id desc")->fetchAll();
+    echo json_encode(array('sof'=>$sof, 'banks'=>$banks, 'cc'=>$cc, 'coa'=>$coa, 'budget'=>$budget, 
+    'dept'=>$dept, 'prog'=>$prog, 'head'=>$head, 'sub'=>$sub, 'suppliers'=>$suppliers, 'cust'=>$cust));
 }
 
 if(isset($_GET['uniqueId'])){
