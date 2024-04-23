@@ -37,8 +37,42 @@ if(isset($_POST['uidsingle'])){
         foreach($_POST['data'] as $data){
             $final = array_combine(array('b_id', 'amount', 'coa_id', 'description'), array($bid->id, floatval($data['amount']),$data['act'], $data['actDesc']));
             $check = $f->insertData($final, 'billsitems');
-         }
+         }      
     echo json_encode(array('status'=>'done', 'data'=>$recNum));
+}
+
+if(isset($_POST['billID'])){
+
+    if($_POST['recCred'] == 1){
+
+        $year = date('Y');
+        $c = $f->selectJoins("select * from receipts where YEAR(date) = '$year' and type = 1")->rowCount();
+        $c++;
+        $recNum = 'R'.$c.'/'.substr(date('Y'),2,4);
+        $combinedArray = array_combine(array('receipt_no', 'b_id', 'issuer', 'amount', 'description', 'type', 'cust'), 
+                                        array($recNum, $_POST['billID'], $_POST['recUser'], $_POST['recAmount'], $_POST['recDesc'], 1, $_POST['cust']));
+        $check = $f->insertData($combinedArray,'receipts');
+        $data = $f-> selectJoins("select * from bills where id = '".$_POST['billID']."' limit 1")->fetchObject();
+        $id = $f->insertData(array_combine(array('coa_id', 'amount', 'description', 'paye', 'type', 'cid', 'bank', 'sof', 'cheque', 'proj_id'), 
+        array(0, $_POST['recAmount'], 'Receipt for '.$data->invoice_no.':'.$_POST['recDesc'], $_POST['custName'], 'income', 1, 13, $data->sof_id, $recNum, 0)), 'cashbook');
+
+    }else{
+
+        $year = date('Y');
+        $c = $f->selectJoins("select * from receipts where YEAR(date) = '$year' and type = 2")->rowCount();
+        $c++;
+        $recNum = 'CN'.$c.'/'.substr(date('Y'),2,4);
+        $combinedArray = array_combine(array('receipt_no', 'b_id', 'issuer', 'amount', 'description', 'type', 'cust'), 
+                                        array($recNum, $_POST['billID'], $_POST['recUser'], $_POST['recAmount'], 'Credit note for '.$_POST['invno'].':'.$_POST['recDesc'], 2, $_POST['cust']));
+        $check = $f->insertData($combinedArray,'receipts');
+    }
+
+
+    if($check){
+        echo json_encode(array('status'=>'done', 'data'=>$recNum));
+    }else{
+        echo json_encode(array('status'=>'Didnt post'));
+    }
 }
 
 

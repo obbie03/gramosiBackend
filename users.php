@@ -45,3 +45,23 @@ if(isset($_POST['formType'])){
    echo json_encode(array('status'=>200, 'msg'=>'successful registration'));
 }
 
+if(isset($_POST['lemail'])){
+    $email = $_POST['lemail'];
+    $password = $_POST['lpassword'];
+    $user = $f->selectJoins("SELECT * FROM authentication WHERE email = '$email' and user_type != 1 LIMIT 1");
+
+    if($user->rowCount() > 0){
+        $userObject = $user->fetchObject(); 
+
+        if (password_verify($password, $userObject->password)) {
+            
+            $response = ['status' => 200, 'uid' => $userObject->id];
+        } else {
+            $response = ['status' => 405, 'message' => 'Wrong password'];
+        }
+    } else {
+        $response = ['status' => 404, 'message' => 'User does not exist'];
+    }
+
+    echo json_encode($response);
+}

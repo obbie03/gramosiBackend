@@ -53,3 +53,44 @@ LEFT JOIN bio_data AS c ON b.customer = c.u_id")->fetchAll();
     echo json_encode(array('bills'=>$bills, 'recs'=>$recs));
 }
 
+
+if(isset($_GET['tb'])){
+
+        // $cid = getCid($_GET['cs']);
+        $cid = 1;
+        $bills = $f->selectJoins("SELECT coa_id, SUM(amount) - IFNULL(receipt_amount, 0) 
+        AS amount FROM billsitems b LEFT JOIN ( SELECT b_id, amount AS receipt_amount
+         FROM receipts r WHERE r.type = 2 ) AS subquery ON b.b_id = subquery.b_id GROUP BY b.coa_id")->fetchAll();
+        $recs = $f->selectJoins("select sum(amount) as amount from receipts where type != 2")->fetchAll();
+        $supplierData = $f->selectJoins("SELECT coa, type, sum(amount) as amount from supplier_trans GROUP by coa, type")->fetchAll();
+        $cash = $f->selectJoins("SELECT SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) - SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS difference FROM cashbook")->fetchAll();
+        $journal = $f->selectJoins("select * from journals")->fetchAll();
+        echo json_encode(array('bills'=>$bills, 'recs'=>$recs, 'supplier'=>$supplierData, 'cash'=>$cash, 'journal'=>$journal));
+    
+}
+
+
+if(isset($_GET['randp'])){
+
+    $budget = $f->selectJoins("SELECT * FROM chart_of_account c left join budget b on c.id = b.coa where b.id is not null")->fetchAll();
+    $cash = $f->selectJoins("SELECT * FROM cashbook c left join budget b on c.coa_id = b.id where b.id is not null")->fetchAll();
+    echo json_encode(['budget'=>$budget, 'cash'=>$cash]);
+
+}
+
+if(isset($_GET['chequeno'])){
+
+    $cheque = $_GET['chequeno'];
+    $amount = $_GET['amount'];
+    $get  = $f->selectJoins("select * from cashbook where amount = '$amount' and cheque = '$cheque'")->rowCount();
+
+    if($get > 0){
+        echo json_encode(['status'=>200]);
+    }else{
+        echo json_encode(['status'=>400]);
+    }
+    
+
+
+}
+

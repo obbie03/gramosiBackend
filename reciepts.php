@@ -2,20 +2,7 @@
 
 include('connector.php');
 
-if(isset($_POST['billID'])){
-    $year = date('Y');
-    $c = $f->selectJoins("select * from receipts where YEAR(date) = '$year'")->rowCount();
-    $c++;
-    $recNum = 'R'.$c.'/'.substr(date('Y'),2,4);
-    $combinedArray = array_combine(array('receipt_no', 'b_id', 'issuer', 'amount', 'description'), 
-                                    array($recNum, $_POST['billID'], $_POST['recUser'], $_POST['recAmount'], $_POST['recDesc'] ));
-    $check = $f->insertData($combinedArray,'receipts');
-    if($check){
-        echo json_encode(array('status'=>'done', 'data'=>$recNum));
-    }else{
-        echo json_encode(array('status'=>'Didnt post'));
-    }
-}
+
 
 if (isset($_GET['receipts'])) {
     $r = $f->load("SELECT * FROM receipts");

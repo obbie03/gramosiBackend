@@ -125,7 +125,37 @@ $tb13 = "CREATE TABLE billsItems (
     amount  float(10,2) not null
     )";
 
-$arr = array($tb1, $tb2, $tb3, $tb4, $tb5, $tb6, $tb7, $tb8, $tb9, $tb10, $tb11, $tb12, $tb13);
+  $tb14 = "CREATE TABLE supplier_trans (
+      id       INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      sid      int not null,
+      invoice  varchar(100) not null,
+      amount   float(10,2) not null,
+      type  int not null,
+      date  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )";
+
+$tb15 = "CREATE TABLE roles (
+  id        INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name      varchar(50) not null,
+  hierarchy int not null
+)";
+
+$tb16 = "CREATE TABLE user_roles (
+  id       INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  uid      int not null,
+  rid      int not null,
+  date  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)";
+
+$tb17 = "CREATE TABLE actions (
+  id       INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  uid      int not null,
+  cid      int not null,
+  text      varchar(255) not null,
+  date  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)";
+
+$arr = array($tb1, $tb2, $tb3, $tb4, $tb5, $tb6, $tb7, $tb8, $tb9, $tb10, $tb11, $tb12, $tb13, $tb14, $tb15, $tb16, $tb17);
 foreach($arr as $a){
     $f->createTable($a);
 }

@@ -10,13 +10,25 @@ ini_set('max_execution_time', 9999);
 require 'Core/Functions.php';
 use Core\Functions;
 
-$f = new Functions('41.63.9.34', 3306, 'gramosic', 'Obbie03', 'Malumbo@11');
+$f = new Functions('localhost', 3306, 'gramosic', 'root', '');
 
 function getcid($uid)
 {
     global $f;
     $cid = $f->selectData('authentication', '', "where id='$uid' limit 1")->fetchObject()->c_id;
     return $cid;
+}
+
+function getSupplier($id)
+{
+    global $f;
+    return $f->selectData('suppliers', '', "where id = '$id' limit 1")->fetchObject();
+}
+
+function getCoaBudget($id)
+{
+    global $f;
+    return $f->selectData('budget', '', "where id = '$id' limit 1")->fetchObject();
 }
 
 function addProgram($name)
@@ -31,6 +43,17 @@ function addProgram($name)
     return $id;
 }
 
+function addDept($name){
+    global $f;
+    $name = strtolower($name);
+    $prog = $f->selectData('department', '', "where lower(name) = '$name' limit 1");
+    if ($prog->rowCount() > 0) {
+        return $prog->fetchObject()->id;
+    }
+    $id = $f->insertReturnId(array('c_id' => 1, 'name' => $name), 'department');
+    return $id;
+}
+
 function addCustomer($d)
 {
     global $f;
@@ -38,12 +61,23 @@ function addCustomer($d)
     if (!$f->checkTableValue($d['account_no'], 'customers', 'account_no')) {
         $id = $f->insertReturnId(array('c_id' => 1, 'email' => $d['account_no'] . '@email.com', 'user_type' => 1, 'password' => '$2y$10$z4MMdmy.BOzmsJINTEheKe3RxdNEbh7PnivEmPhpOReNhcow8dsZK', 'mode' => 0), 'authentication');
         $f->insertData(array('u_id' => $id, 'firstname' => $names[0], 'middlename' => count($names) > 2 ? $names[1] : '', 'lastname' => $names[count($names) - 1], 'nrc' => $d['nrc'], 'phonenumber' => $d['phonenumber'], 'sex' => $d['sex'], 'dob' => $d['dob']), 'bio_data');
-        $f->insertData(array('u_id' => $id, 'account_no' => $d['account_no'], 'code' => $d['code']), 'customers');
+        $f->insertData(array('u_id' => $id, 'account_no' => $d['account_no'], 'code' => $d['code'], 'type'=>1), 'customers');
         return ["status" => true, "msg" => "New Customer Added Successfully!"];
     } else {
         return ["status" => false, "error" => "Account Already Exists!"];
     }
 }
+function addCustomers($name, $account, $code){
+    global $f;
+    $names = explode(" ", $name);
+    if(!$f->checkTableValue($account, 'customers', 'account_no')){
+        $id = $f->insertReturnId(array('c_id'=>1, 'email'=>$account.'@email.com', 'user_type'=>1, 'password'=>'$2y$10$z4MMdmy.BOzmsJINTEheKe3RxdNEbh7PnivEmPhpOReNhcow8dsZK', 'mode'=>0), 'authentication');
+        $f->insertData(array('u_id'=>$id, 'firstname'=>$names[0], 'middlename'=>count($names)>2?$names[1]:'', 'lastname'=>$names[count($names)-1], 'nrc'=>'nrc', 'phonenumber'=>'pn' , 'sex'=>'sex', 'dob'=>''), 'bio_data');
+        $f->insertData(array('u_id'=>$id, 'account_no'=>$account, 'code'=>$code), 'customers');
+    }
+    return true;
+}
+
 
 function updateCustomer($d)
 {
@@ -99,7 +133,6 @@ function getProperty($type)
 {
     global $f;
     $property = $f->selectJoins("select property.*, property_type.name as property_type, user_property.u_id as owner_id, bio_data.firstname, bio_data.lastname from property inner join property_type inner join user_property inner join bio_data on property.type_id = property_type.id and property.id = user_property.p_id and bio_data.u_id = user_property.u_id order by property.id desc")->fetchAll(PDO::FETCH_ASSOC);
-
     $property_types = $f->selectJoins("select * from property_type")->fetchAll(PDO::FETCH_ASSOC);
     $coa = $f->selectJoins("select * from chart_of_account")->fetchAll(PDO::FETCH_ASSOC);
     $cust = $f->selectJoins("select customers.*, bio_data.id as bio_id, bio_data.firstname, bio_data.lastname from customers inner join bio_data on customers.u_id = bio_data.u_id")->fetchAll(PDO::FETCH_ASSOC);
@@ -158,6 +191,41 @@ function addProperty($name, $coa, $type, $street, $town, $location, $plot, $hect
         return ["status" => false, "error" => "Chart of account not found!"];
     }
 }
+
+
+function addPropertys($name, $coa,$type, $street, $town,$location, $plot, $hectares, $value, $improvement, $rate_value, $rate, $payable){
+    global $f;  
+
+    $getCoa = $f->selectData('chart_of_account', '', "where account = '$coa' limit 1");
+    if($getCoa->rowCount() > 0){
+        $data = array(
+            'c_id'=>1,
+            'type_id'=>$type,
+            'coa_id'=>$getCoa->fetchObject()->id,
+            'street'=>$street,
+            'town'=>$town,
+            'name'=>$name,
+            'location'=>$location,
+            'plot'=>$plot,
+            'hectares'=>$hectares,
+            'value'=>$value,
+            'improvement'=>$improvement,
+            'rate_value'=>$rate_value,
+            'rate'=>$rate,
+            'payable'=>$payable
+        );
+        $prop = $f->selectData('property', '', "where name = '$name' and town = '$town' and plot = '$plot' and location = '$location' limit 1");
+        if($prop->rowCount() > 0){
+            return $prop->fetchObject()->id;
+        }
+        $id = $f->insertReturnId($data, 'property');
+        return $id;
+    }else{
+        return 0;
+    }
+  
+}
+
 
 function updateProperty($d)
 {
