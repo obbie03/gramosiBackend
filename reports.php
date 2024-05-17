@@ -78,19 +78,20 @@ if(isset($_GET['randp'])){
 
 }
 
-if(isset($_GET['chequeno'])){
+if(isset($_GET['month'])){
 
-    $cheque = $_GET['chequeno'];
-    $amount = $_GET['amount'];
-    $get  = $f->selectJoins("select * from cashbook where amount = '$amount' and cheque = '$cheque'")->rowCount();
+    $month = $_GET['month'];
+    $bank = $_GET['bank'];
+    $trans = $f->selectJoins("select * from cashbook where month(date) = '$month' and bank = '$bank'")->fetchAll();
 
-    if($get > 0){
-        echo json_encode(['status'=>200]);
-    }else{
-        echo json_encode(['status'=>400]);
-    }
-    
+    $diff = $f->selectJoins("SELECT 
+            SUM(CASE WHEN type = 'expense' THEN amount ELSE -amount END) AS diff
+        FROM 
+            cashbook
+        WHERE 
+            MONTH(date) < $month")->fetchAll();
 
+            echo json_encode(['trans'=>$trans, 'cash'=>$diff]);
 
 }
 

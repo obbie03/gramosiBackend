@@ -21,6 +21,19 @@ if(isset($_GET['getgen'])){
     'dept'=>$dept, 'prog'=>$prog, 'head'=>$head, 'sub'=>$sub, 'suppliers'=>$suppliers, 'cust'=>$cust, 'users'=>$users));
 }
 
+if(isset($_GET['gen'])){
+    $uid = 1;
+    $cid = getcid($uid);
+    $sof = $f->selectData('source_of_fund', '', "where c_id = '$cid'")->fetchAll();
+    $banks = $f->selectData('bank', '', "where c_id = '$cid'")->fetchAll();
+    $cc = $f->selectData('collection_center', '', "where c_id = '$cid'")->fetchAll();
+    $coa = $f->selectData('chart_of_account', '', "where c_id = '$cid'")->fetchAll();
+
+    $cust = $f->selectJoins("select * from customers inner join bio_data on customers.u_id = bio_data.u_id order by customers.id desc")->fetchAll();
+    
+    echo json_encode(array('sof'=>$sof, 'banks'=>$banks, 'cc'=>$cc, 'coa'=>$coa, 'cust'=>$cust));
+}
+
 if(isset($_GET['uniqueId'])){
     $code = $_GET['uniqueId'];
     $data = $f->selectJoins("SELECT c.*, p.name as programme FROM chart_of_account c left join programmes p on c.programme = p.id WHERE account = '$code'")->fetchAll();
